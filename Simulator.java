@@ -32,14 +32,16 @@ public class Simulator {
 
     public static void main(String args[]) throws Exception{
     	double clock;
+    	int peopleOnFloor0 = 0;
     	int arrivals = 0;
     	int count = 1;
     	double eventTime;
+    	int elevatorSize = 0;
     	Event arrivalOne = new Event(ARRIVAL, count, 0);
 		Elevator elevator = new Elevator(0);
     	eventList.add(arrivalOne);
 		
-		Event stop = new Event(STOP, -1,  60);		
+		Event stop = new Event(STOP, -1,  30);		
 		eventList.add(stop);
 		Event currentEvent = eventList.poll();
 		int eventType = currentEvent.type;
@@ -54,17 +56,28 @@ public class Simulator {
 				System.out.println("Person arrived at " + eventTime);
 				Person passenger = new Person(customerID);
 				System.out.println("Current Person's ID: " + passenger.personID);
-				
-				elevator.addPassenger(customerID, passenger);
+				peopleOnFloor0++;
+				if (elevator.floor == 0){
+					elevator.addPassenger(customerID, passenger);
+					elevatorSize++;
+					System.out.printf("Scheduling leave elevator event for customer %d at %f\n", customerID,clock+5.0);
+					Event departElevator = new Event(LEAVE_ELEVATOR, customerID, clock + 5.0);
+					eventList.add(departElevator);
+					System.out.println("Person's requested floor is " + passenger.requestedFloor);
+					System.out.println("Number of people on the elevator " + elevatorSize);
+				}
+				else{
+					
+				}
 				count++;
 				Event nextArrival = new Event(ARRIVAL, count, clock + getArrival(0.5));
 				System.out.printf("Scheduling arrival event for customer %d at %f\n", count, nextArrival.time);
 				eventList.add(nextArrival);
-				System.out.printf("Scheduling leave elevator event for customer %d at %f\n", customerID,clock+1.0);
-				Event departElevator = new Event(LEAVE_ELEVATOR, customerID, clock + 1.0);
-				eventList.add(departElevator);
-				
-				System.out.println("Person's requested floor is " + passenger.requestedFloor);
+				//System.out.printf("Scheduling leave elevator event for customer %d at %f\n", customerID,clock+5.0);
+				//Event departElevator = new Event(LEAVE_ELEVATOR, customerID, clock + 5.0);
+				//eventList.add(departElevator);
+				//System.out.println("Person's requested floor is " + passenger.requestedFloor);
+				//System.out.println("Number of people on the elevator " + elevatorSize);
 			}
 			if (eventType == LEAVE_ELEVATOR){
 				System.out.println("Time for customer " + customerID + " To leave the elevator");
@@ -73,6 +86,8 @@ public class Simulator {
 				elevator.floor = result.getClass().getField("requestedFloor").getInt(result);
 				System.out.println("Elevator is now on floor " + elevator.floor + " customer " + customerID + " is getting off");
 				elevator.passengers.set(customerID, null);
+				elevatorSize--;
+				System.out.println("Number of people on the elevator " + elevatorSize);
 			}
 			
 			currentEvent = eventList.poll();			

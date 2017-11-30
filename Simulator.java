@@ -10,7 +10,7 @@ public class Simulator {
 	public static final int STOP = 6;
 	public static final int IDLE = 0;
 	public static final int BUSY = 1;
-	public static final int MAX_CUSTOMERS = 1000;
+	public static final int MAX_CUSTOMERS = 10000;
     private static final Random R1 = new Random(12345);
     private static final Random R2 = new Random(54321);
 	public static PriorityQueue<Event> eventList = new PriorityQueue<Event>();
@@ -87,7 +87,7 @@ public class Simulator {
 				elevator.floor = 0;
 				elevator.state = IDLE;
 			}
-			/* Checks if there are any passengers waiting on floor 0 (the lobby)*/
+			/* Checks if there are any passengers waiting on floor 0 (the lobby)
 			while (waitList.size() > 0 && elevator.floor == 0){
 				System.out.println("Handling wait list");
 				Event waitingEvent = waitList.poll();
@@ -105,7 +105,7 @@ public class Simulator {
 				System.out.println("Person's requested floor is " + waitPassenger.requestedFloor);
 				System.out.println("Number of people on the elevator " + elevatorSize);
 			}
-			
+			*/
 			if (eventType == ARRIVAL){
 				System.out.println("ARRIVAL");
 				responseTimes[customerID -1] = eventTime;
@@ -126,12 +126,26 @@ public class Simulator {
 					System.out.println("Person's requested floor is " + passenger.requestedFloor);
 					System.out.println("Number of people on the elevator " + elevatorSize);
 				}
-				/* If the elevator isn't on floor 0, we just tell the passenger to wait in the lobby*/
+				/* If the elevator isn't on floor 0, we move the elevator to floor 0*/
 				
 				else{
-					System.out.println("Waiting for Elevator");
-					waitList.add(currentEvent);
-					System.out.println("Waitlist size " + waitList.size());
+					int cFloor = elevator.floor*10;
+					double timeTaken = ((double) cFloor)/60;
+					System.out.println("Moving to floor 0" +  " in " + timeTaken + " minutes" );
+					clock = clock + timeTaken;
+					elevator.floor = 0;
+					System.out.println("Updated time " + clock);
+					System.out.println("Elevator arrived on floor " + elevator.floor);
+					elevator.addPassenger(customerID, passenger);
+					elevatorSize++;
+					System.out.printf("Scheduling move elevator event for passenger %d at %f\n", customerID,clock+5.0);
+					Event departElevator = new Event(START_MOVING, customerID, clock + 5.0);
+					eventList.add(departElevator);
+					System.out.println("Person's requested floor is " + passenger.requestedFloor);
+					System.out.println("Number of people on the elevator " + elevatorSize);
+					//System.out.println("Waiting for Elevator");
+					//waitList.add(currentEvent);
+					//System.out.println("Waitlist size " + waitList.size());
 				}
 				count++;
 				if (arrivals < MAX_CUSTOMERS){
